@@ -1,16 +1,18 @@
 // --- Configuration ---
-const CORRECT_PASSWORD = 'faris';
+const CORRECT_PASSWORD = '11102025';
 const STATIC_TEXT = [
-    "Welcome to Private Message.", 
-    "Sebelumnya ", 
-    "Terima kasih telah mengunjungi halaman ini.", 
-    "This text automatically resizes on smaller screens thanks to the mobile query, ensuring maximum readability. Thank u from me. "
+    "Welcome to Private Message.",
+    "Sebelumnya maaf atas kejadian waktu itu. bila mengganggu yang sangat annoying, mybe. uhmm... yep jujur itu cuma niat baik aja sih. hanya saja waktu itu sebenarnya ngajak anak\" jajan yang mereka pengen, anak-anak lucu emg",
+    "oh iya waktu itu juga for u too, is it good?. Ty yaa ✌︎︎•ᴗ•",
+    "Thank you telah menerima dan meluangkan waktu untuk membaca Private Message ini. ",
 ];
-const REPEAT_TEXT = "wa.me/6285600447763";
-const TYPING_SPEED = 50; 
-const DELETE_SPEED = 40; 
-const REPEAT_PAUSE = 3000; // ms
-const REPEAT_DELAY = 200; 
+const REPEAT_TEXT = "click reply for me ➤";
+const REPEAT_LINK_URL = "https://wa.me/6285600447763"; 
+
+const TYPING_SPEED = 50;
+const DELETE_SPEED = 20;
+const REPEAT_PAUSE = 3000; // 3s
+const REPEAT_DELAY = 200; // 2s
 
 // --- DOM Element References ---
 const passwordGate = document.getElementById('password-gate');
@@ -20,21 +22,27 @@ const notification = document.getElementById('notification');
 const togglePasswordButton = document.getElementById('toggle-password');
 const textContainer = document.getElementById('text-container');
 const typedTextSpan = document.getElementById('typed-text');
-const soundcloudPlayer = document.getElementById('soundcloud-player');
+const soundcloudPlayer = document.getElementById('soundcloud-player'); 
 
 let repeatLoopRunning = false;
 
 // --- Show/Hide Password ---
-togglePasswordButton.addEventListener('click', () => {
-    const isPassword = passwordInput.type === 'password';
-    passwordInput.type = isPassword ? 'text' : 'password';
+if (togglePasswordButton && passwordInput) {
+    togglePasswordButton.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
 
-    const icon = togglePasswordButton.querySelector('ion-icon');
-    icon.setAttribute('name', isPassword ? 'eye-off' : 'eye');
-});
+        const icon = togglePasswordButton.querySelector('ion-icon');
+        if (icon) {
+            icon.setAttribute('name', isPassword ? 'eye-off' : 'eye');
+        }
+    });
+}
 
 // --- Typing Animation Function with repeating section ---
-function startTypingAnimation(staticText, repeatText) {
+function startTypingAnimation(staticText, repeatText, repeatLinkUrl) {
+    if (!textContainer || !typedTextSpan || !passwordGate) return;
+
     textContainer.style.display = 'flex';
     passwordGate.style.display = 'none';
     typedTextSpan.textContent = ''; // clearText
@@ -45,7 +53,7 @@ function startTypingAnimation(staticText, repeatText) {
     let staticTextIndex = 0;
 
     function typeStatic() {
-        if (staticTextIndex < staticText.length) {
+        if (!repeatLoopRunning && staticTextIndex < staticText.length) {
             const currentText = staticText[staticTextIndex];
             if (staticIndex < currentText.length) {
                 typedTextSpan.textContent += currentText.charAt(staticIndex);
@@ -61,7 +69,7 @@ function startTypingAnimation(staticText, repeatText) {
                 } else {
                     if (!repeatLoopRunning) {
                         repeatLoopRunning = true;
-                        startRepeatLoop(repeatText);
+                        eraseStatic(() => startRepeatLoop(repeatText, repeatLinkUrl));
                     }
                 }
             }
@@ -78,33 +86,36 @@ function startTypingAnimation(staticText, repeatText) {
     }
 
     // Loop that types and deletes the repeatText indefinitely
-    function startRepeatLoop(text) {
+    function startRepeatLoop(text, url) {
+        typedTextSpan.textContent = '';
+
         const link = document.createElement('a');
-        link.href = (text.startsWith('http://') || text.startsWith('https://')) ? text : 'https://' + text;
+        link.href = url;
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
         link.style.textDecoration = 'none';
         link.style.cursor = 'pointer';
         link.style.color = 'inherit'; // keep color consistent with surrounding text
         link.textContent = '';
-        typedTextSpan.appendChild(link);
+        typedTextSpan.appendChild(link); 
 
         let rIndex = 0;
 
         function typeForward() {
-            typedTextSpan.classList.remove('finished');
+            typedTextSpan.classList.remove('finished'); 
 
             if (rIndex < text.length) {
                 link.textContent += text.charAt(rIndex);
                 rIndex++;
                 setTimeout(typeForward, TYPING_SPEED);
             } else {
-                
-                setTimeout(eraseBackward, REPEAT_PAUSE); // Fully typed the repeat text; pause then start erasing
+                typedTextSpan.classList.add('finished');
+                setTimeout(eraseBackward, REPEAT_PAUSE);
             }
         }
 
         function eraseBackward() {
+            typedTextSpan.classList.remove('finished');
             if (rIndex > 0) {
                 link.textContent = link.textContent.slice(0, -1);
                 rIndex--;
@@ -121,9 +132,9 @@ function startTypingAnimation(staticText, repeatText) {
 }
 
 function startSoundcloudAutoplay() {
-    if (soundcloudPlayer) {
+    if (soundcloudPlayer && typeof soundcloudPlayer.play === 'function') {
         soundcloudPlayer.play().catch(error => {
-            console.error("Audio Playback failed:", error);
+            console.error("Audio Playback failed (browser restriction likely):", error);
         });
     }
 }
@@ -131,14 +142,16 @@ function startSoundcloudAutoplay() {
 
 // --- Notification Handler ---
 function showNotification(message, isError = false) {
+    if (!notification) return;
+
     notification.textContent = message;
-    notification.classList.remove('error');
-    notification.classList.remove('show');
+    notification.classList.remove('error', 'show');
 
     if (isError) {
         notification.classList.add('error');
     }
 
+    // Use a small delay to trigger CSS transition for 'show'
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
@@ -149,27 +162,28 @@ function showNotification(message, isError = false) {
 }
 
 // --- Password Check and Submit Handler ---
-submitButton.addEventListener('click', () => {
-    const enteredPassword = passwordInput.value.trim();
+if (submitButton && passwordInput) {
+    submitButton.addEventListener('click', () => {
+        const enteredPassword = passwordInput.value.trim();
 
-    if (enteredPassword === CORRECT_PASSWORD) {
-        // Correct Password: Start the animation
-        startTypingAnimation(STATIC_TEXT, REPEAT_TEXT);
-        
-        // Mulai pemutaran audio setelah konten diungkapkan
-        startSoundcloudAutoplay(); 
-        
-    } else {
-        // Incorrect Password: Show notification with hint
-        const errorMessage = "Password incorrect. Hint is 'barCode'";
-        showNotification(errorMessage, true);
-        passwordInput.value = ''; // Clear the input
-    }
-});
+        if (enteredPassword === CORRECT_PASSWORD) {
+            startTypingAnimation(STATIC_TEXT, REPEAT_TEXT, REPEAT_LINK_URL);
 
-// Allow hitting 'Enter' to submit the password
-passwordInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-        submitButton.click();
-    }
-});
+            startSoundcloudAutoplay();
+
+        } else {
+            // Incorrect Password: hint
+            const errorMessage = "Password incorrect. Hint is 'barCode'";
+            showNotification(errorMessage, true);
+            passwordInput.value = ''; // Clear the input
+        }
+    });
+
+    // Allow hitting 'Enter' to submit the password
+    passwordInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            submitButton.click();
+        }
+    });
+}
