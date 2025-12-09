@@ -7,7 +7,7 @@ const STATIC_TEXT = [
     "yang mereka pengen Ice Cream, tingkahnya anak-anak lucu emg",
     "oh iya waktu itu juga for u too, is it tasty?. Ty yaa ✌︎︎•ᴗ•",
     "Thank you telah menerima dan meluangkan waktu untuk membaca Private Message ini. ",
-    " ✦ 20-10-2025 ✦ @iMen. ",
+    " ✦ 20-10-2025 ✦     @iMen. ",
 ];
 const REPEAT_TEXT = "click reply for me ➤";
 const REPEAT_LINK_URL = "https://wa.me/6285600447763";
@@ -197,3 +197,4 @@ if (submitButton && passwordInput) {
         }
     });
 }
+
