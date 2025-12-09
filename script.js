@@ -5,9 +5,9 @@ const STATIC_TEXT = [
     "Sebelumnya maaf atas kejadian waktu awal itu. bila mengganggu yang sangat annoying, mybe.",
     "uhmm... yep jujur itu cuma niat baik aja sih. hanya saja waktu itu sebenarnya ngajak anak\" jajan yang mereka pengen,",
     "yang mereka pengen Ice Cream, tingkahnya anak-anak lucu emg",
-    "oh iya waktu itu juga for u too, is it tasty?.    Ty yaa ✌︎︎•ᴗ•",
+    "oh iya waktu itu juga for u too, is it tasty?. Ty yaa ✌︎︎•ᴗ•",
     "Thank you telah menerima dan meluangkan waktu untuk membaca Private Message ini. ",
-    " ✦ 20-10-2025 ✦ \    @iMen.    ",
+    " ✦ 20-10-2025 ✦ @iMen. ",
 ];
 const REPEAT_TEXT = "click reply for me ➤";
 const REPEAT_LINK_URL = "https://wa.me/6285600447763";
@@ -66,13 +66,20 @@ function startTypingAnimation(staticText, repeatText, repeatLinkUrl) {
                 staticIndex = 0;
                 staticTextIndex++;
                 if (staticTextIndex < staticText.length) {
+                    // Pause (3s) between intermediate static lines
                     setTimeout(() => {
                         eraseStatic(() => typeStatic());
                     }, REPEAT_PAUSE);
                 } else {
+                    // This is the end of the static text array
                     if (!repeatLoopRunning) {
                         repeatLoopRunning = true;
-                        eraseStatic(() => startRepeatLoop(repeatText, repeatLinkUrl));
+                        
+                        // MODIFICATION: Pause (3s) after the last static line 
+                        // before erasing and starting the repeat loop.
+                        setTimeout(() => {
+                             eraseStatic(() => startRepeatLoop(repeatText, repeatLinkUrl));
+                        }, REPEAT_PAUSE);
                     }
                 }
             }
@@ -190,10 +197,3 @@ if (submitButton && passwordInput) {
         }
     });
 }
-
-
-
-
-
-
-
