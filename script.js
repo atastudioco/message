@@ -183,7 +183,7 @@ if (submitButton && passwordInput) {
 
         } else {
             // Incorrect Password: hint
-            const errorMessage = "Password incorrect. Hint is 'barCode'";
+            const errorMessage = "Password incorrect. Hint is 'back barCode'";
             showNotification(errorMessage, true);
             passwordInput.value = ''; // Clear the input
         }
@@ -197,4 +197,5 @@ if (submitButton && passwordInput) {
         }
     });
 }
+
 
